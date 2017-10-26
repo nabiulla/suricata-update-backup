@@ -1,6 +1,6 @@
 import unittest
 
-from idstools import maps
+from suricata import maps
 
 class SignatureMapTestCase(unittest.TestCase):
 

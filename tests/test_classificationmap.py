@@ -1,6 +1,6 @@
 import unittest
 
-from idstools.maps import ClassificationMap
+from suricata.maps import ClassificationMap
 
 class ClassificationMapTestCase(unittest.TestCase):
 
