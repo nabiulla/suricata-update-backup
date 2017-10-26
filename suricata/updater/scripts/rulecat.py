@@ -44,12 +44,12 @@ if sys.argv[0] == __file__:
     sys.path.insert(
         0, os.path.abspath(os.path.join(__file__, "..", "..", "..")))
 
-import suricata.rule
-import suricata.suricata
-import suricata.net
-from suricata.rulecat import configs
-from suricata.rulecat.loghandler import SuriColourLogHandler
-from suricata.rulecat import extract
+import suricata.updater.rule
+import suricata.updater.suricata
+import suricata.updater.net
+from suricata.updater.rulecat import configs
+from suricata.updater.rulecat.loghandler import SuriColourLogHandler
+from suricata.updater.rulecat import extract
 
 # Initialize logging, use colour if on a tty.
 if len(logging.root.handlers) == 0 and os.isatty(sys.stderr.fileno()):
@@ -197,7 +197,7 @@ class ModifyRuleFilter(object):
 
     def filter(self, rule):
         modified_rule = self.pattern.sub(self.repl, rule.format())
-        parsed = suricata.rule.parse(modified_rule, rule.group)
+        parsed = suricata.updater.rule.parse(modified_rule, rule.group)
         if parsed is None:
             logger.error("Modification of rule %s results in invalid rule: %s",
                          rule.idstr, modified_rule)
@@ -241,7 +241,7 @@ class DropRuleFilter(object):
         return self.matcher.match(rule)
 
     def filter(self, rule):
-        drop_rule = suricata.rule.parse(re.sub("^\w+", "drop", rule.raw))
+        drop_rule = suricata.updater.rule.parse(re.sub("^\w+", "drop", rule.raw))
         drop_rule.enabled = rule.enabled
         return drop_rule
 
@@ -257,7 +257,7 @@ class Fetch(object):
                 open(tmp_filename, "rb").read()).hexdigest().strip()
             remote_checksum_buf = io.BytesIO()
             logger.info("Checking %s." % (checksum_url))
-            suricata.net.get(checksum_url, remote_checksum_buf)
+            suricata.updater.net.get(checksum_url, remote_checksum_buf)
             remote_checksum = remote_checksum_buf.getvalue().decode().strip()
             logger.debug("Local checksum=|%s|; remote checksum=|%s|" % (
                 local_checksum, remote_checksum))
@@ -308,7 +308,7 @@ class Fetch(object):
         if not os.path.exists(self.args.temp_dir):
             os.makedirs(self.args.temp_dir)
         logger.info("Fetching %s." % (url))
-        suricata.net.get(
+        suricata.updater.net.get(
             url,
             open(tmp_filename, "wb"),
             progress_hook=self.progress_hook if not self.args.quiet else None)
@@ -456,7 +456,7 @@ def write_merged(filename, rulemap):
         prev_rulemap = {}
         if os.path.exists(filename):
             prev_rulemap = build_rule_map(
-                suricata.rule.parse_file(filename))
+                suricata.updater.rule.parse_file(filename))
         report = build_report(prev_rulemap, rulemap)
         enabled = len([rule for rule in rulemap.values() if rule.enabled])
         logger.info("Writing rules to %s: total: %d; enabled: %d; "
@@ -480,7 +480,7 @@ def write_to_directory(directory, files, rulemap):
                 directory, os.path.basename(filename))
             if os.path.exists(outpath):
                 previous_rulemap.update(build_rule_map(
-                    suricata.rule.parse_file(outpath)))
+                    suricata.updater.rule.parse_file(outpath)))
         report = build_report(previous_rulemap, rulemap)
         enabled = len([rule for rule in rulemap.values() if rule.enabled])
         logger.info("Writing rule files to directory %s: total: %d; "
@@ -501,7 +501,7 @@ def write_to_directory(directory, files, rulemap):
         else:
             content = []
             for line in io.StringIO(files[filename].decode("utf-8")):
-                rule = suricata.rule.parse(line)
+                rule = suricata.updater.rule.parse(line)
                 if not rule:
                     content.append(line.strip())
                 else:
@@ -526,11 +526,11 @@ def write_sid_msg_map(filename, rulemap, version=1):
         for key in rulemap:
             rule = rulemap[key]
             if version == 2:
-                formatted = suricata.rule.format_sidmsgmap_v2(rule)
+                formatted = suricata.updater.rule.format_sidmsgmap_v2(rule)
                 if formatted:
                     print(formatted, file=fileobj)
             else:
-                formatted = suricata.rule.format_sidmsgmap(rule)
+                formatted = suricata.updater.rule.format_sidmsgmap(rule)
                 if formatted:
                     print(formatted, file=fileobj)
 
@@ -561,7 +561,7 @@ def dump_sample_configs():
             shutil.copy(os.path.join(configs.directory, filename), filename)
 
 def resolve_flowbits(rulemap, disabled_rules):
-    flowbit_resolver = suricata.rule.FlowbitResolver()
+    flowbit_resolver = suricata.updater.rule.FlowbitResolver()
     flowbit_enabled = set()
     while True:
         flowbits = flowbit_resolver.get_required_flowbits(rulemap)
@@ -707,7 +707,7 @@ def main():
             logger.info("Loading ./rulecat.conf.")
             sys.argv.insert(1, "@./rulecat.conf")
 
-    suricata_path = suricata.suricata.get_path()
+    suricata_path = suricata.updater.suricata.get_path()
 
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
@@ -781,7 +781,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print("idstools-rulecat version %s" % suricata.version)
+        print("idstools-rulecat version %s" % suricata.updater.version)
         return 0
 
     if args.verbose:
@@ -790,7 +790,7 @@ def main():
         logger.setLevel(logging.WARNING)
 
     logger.debug("This is idstools-rulecat version %s; Python: %s" % (
-        suricata.version,
+        suricata.updater.version,
         sys.version.replace("\n", "- ")))
 
     if args.dump_sample_configs:
@@ -804,14 +804,14 @@ def main():
         args.ignore.append("*deleted.rules")
 
     if args.suricata_version:
-        suricata_version = suricata.suricata.parse_version(args.suricata_version)
+        suricata_version = suricata.updater.suricata.parse_version(args.suricata_version)
         if not suricata_version:
             logger.error("Failed to parse provided Suricata version: %s" % (
                 suricata_version))
             return 1
         logger.info("Forcing Suricata version to %s." % (suricata_version.full))
     elif args.suricata and os.path.exists(args.suricata):
-        suricata_version = suricata.suricata.get_version(args.suricata)
+        suricata_version = suricata.updater.suricata.get_version(args.suricata)
         if suricata_version:
             logger.info("Found Suricata version %s at %s." % (
                 str(suricata_version.full), args.suricata))
@@ -859,7 +859,7 @@ def main():
         if not filename.endswith(".rules"):
             continue
         logger.debug("Parsing %s." % (filename))
-        rules += suricata.rule.parse_fileobj(
+        rules += suricata.updater.rule.parse_fileobj(
             io.BytesIO(files[filename]), filename)
 
     rulemap = build_rule_map(rules)
