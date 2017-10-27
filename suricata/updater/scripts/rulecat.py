@@ -723,8 +723,6 @@ def main():
                         help="Override Suricata version")
     parser.add_argument("-f", "--force", action="store_true", default=False,
                         help="Force operations that might otherwise be skipped")
-    parser.add_argument("--rules-dir", metavar="<directory>",
-                        help=argparse.SUPPRESS)
     parser.add_argument("-o", "--output", metavar="<directory>",
                         dest="output", help="Output rules directory.")
     parser.add_argument("--merged", default=None, metavar="<filename>",
@@ -734,9 +732,9 @@ def main():
     parser.add_argument("--url", metavar="<url>", action="append",
                         default=[],
                         help="URL to use instead of auto-generating one")
-    parser.add_argument("--local", metavar="<filename>", action="append",
+    parser.add_argument("--local", metavar="<path>", action="append",
                         default=[],
-                        help="Local rule files or directories")
+                        help="Local rule files or directories (can be specified multiple times)")
     parser.add_argument("--sid-msg-map", metavar="<filename>",
                         help="Generate a sid-msg.map file")
     parser.add_argument("--sid-msg-map-2", metavar="<filename>",
