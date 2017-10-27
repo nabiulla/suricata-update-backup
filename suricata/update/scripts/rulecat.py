@@ -795,7 +795,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print("idstools-rulecat version %s" % suricata.update.version)
+        print("suricata-update version %s" % suricata.update.version)
         return 0
 
     if args.verbose:
@@ -803,7 +803,7 @@ def main():
     if args.quiet:
         logger.setLevel(logging.WARNING)
 
-    logger.debug("This is idstools-rulecat version %s; Python: %s" % (
+    logger.debug("This is suricata-update version %s; Python: %s" % (
         suricata.update.version,
         sys.version.replace("\n", "- ")))
 
