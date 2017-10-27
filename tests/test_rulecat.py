@@ -89,7 +89,7 @@ class TestRulecat(unittest.TestCase):
             os.makedirs("./tmp")
             subprocess.check_call(
                 ["/usr/bin/env", "python2",
-                 "../bin/suricata-updater",
+                 "../bin/suricata-update",
                  "--url",
                  "file://%s/emerging.rules.tar.gz" % (
                      os.getcwd()),
@@ -127,7 +127,7 @@ class TestRulecat(unittest.TestCase):
             os.makedirs("./tmp")
             subprocess.check_call(
                 ["/usr/bin/env", "python2",
-                 "../bin/suricata-updater",
+                 "../bin/suricata-update",
                  "--url",
                  "file://%s/emerging.rules.tar.gz" % (
                      os.getcwd()),
