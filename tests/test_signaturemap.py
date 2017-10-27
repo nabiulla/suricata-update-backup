@@ -1,6 +1,6 @@
 import unittest
 
-from suricata import maps
+from suricata.update import maps
 
 class SignatureMapTestCase(unittest.TestCase):
 

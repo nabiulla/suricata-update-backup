@@ -29,7 +29,7 @@ import os
 import unittest
 import io
 
-from suricata import net
+from suricata.update import net
 
 class GetTestCase(unittest.TestCase):
 

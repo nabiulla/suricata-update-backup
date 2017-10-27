@@ -28,7 +28,7 @@ from __future__ import print_function
 import unittest
 import tempfile
 
-from suricata import util
+from suricata.update import util
 
 class Md5TestCase(unittest.TestCase):
 

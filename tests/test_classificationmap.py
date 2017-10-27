@@ -1,6 +1,6 @@
 import unittest
 
-from suricata.maps import ClassificationMap
+from suricata.update.maps import ClassificationMap
 
 class ClassificationMapTestCase(unittest.TestCase):
 
