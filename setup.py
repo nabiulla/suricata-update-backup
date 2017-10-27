@@ -1,10 +1,10 @@
 from setuptools import setup
 
-import suricata
+import suricata.update
 
 setup(
     name="suricata-updater",
-    version=suricata.version,
+    version=suricata.update.version,
     description="Suricata Update Tool",
     author="Jason Ish",
     author_email="ish@unx.ca",
@@ -18,9 +18,9 @@ setup(
         "suricata.update.compat.argparse",
     ],
     url="https://github.com/jasonish/suricata-updater",
-    license="BSD",
+    license="GPLv2",
     classifiers=[
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
     ],
     scripts = [
         "bin/suricata-update",
