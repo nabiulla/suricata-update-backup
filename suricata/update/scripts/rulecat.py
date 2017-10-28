@@ -89,6 +89,10 @@ ET_OPEN_URL = ("https://rules.emergingthreats.net/open/"
                "suricata%(version)s%(enhanced)s/"
                "emerging.rules.tar.gz")
 
+# The default filename to use for the output rule file. This is a
+# single file concatenating all input rule files together.
+DEFAULT_OUTPUT_RULE_FILENAME = "suricata.rules"
+
 class AllRuleMatcher(object):
     """Matcher object to match all rules. """
 
@@ -726,6 +730,9 @@ def main():
     suricata_path = suricata.update.suricata.get_path()
 
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
+    parser.add_argument("-o", "--output", metavar="<directory>",
+                        dest="output", default="/var/lib/suricata/rules",
+                        help="Directory to write rules to")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Be more verbose")
     parser.add_argument("-t", "--temp-dir", default="/var/tmp/idstools-rulecat",
@@ -739,10 +746,6 @@ def main():
                         help="Override Suricata version")
     parser.add_argument("-f", "--force", action="store_true", default=False,
                         help="Force operations that might otherwise be skipped")
-    parser.add_argument("-o", "--output", metavar="<directory>",
-                        dest="output", help="Output rules directory.")
-    parser.add_argument("--merged", default=None, metavar="<filename>",
-                        help="Output merged rules file")
     parser.add_argument("--yaml-fragment", metavar="<filename>",
                         help="Output YAML fragment for rule inclusion")
     parser.add_argument("--url", metavar="<url>", action="append",
@@ -791,6 +794,9 @@ def main():
                         help="Command to test Suricata configuration")
     parser.add_argument("-V", "--version", action="store_true", default=False,
                         help="Display version")
+
+    parser.add_argument("--no-merge", action="store_true", default=False,
+                        help="Do not merge the rules into a single file")
 
     args = parser.parse_args()
 
@@ -924,18 +930,27 @@ def main():
     # Fixup flowbits.
     resolve_flowbits(rulemap, disabled_rules)
 
-    if args.output:
-        if not os.path.exists(args.output):
-            logger.info("Making directory %s.", args.output)
-            os.makedirs(args.output)
-        for filename in files:
-            file_tracker.add(
-                os.path.join(args.output, os.path.basename(filename)))
-        write_to_directory(args.output, files, rulemap)
+    # Don't allow an empty output directory.
+    if not args.output:
+        logger.error("No output directory provided.")
+        return 1
 
-    if args.merged:
-        file_tracker.add(args.merged)
-        write_merged(args.merged, rulemap)
+    # Check that output directory exists.
+    if not os.path.exists(args.output):
+        logger.error("Output directory does not exist: %s", args.output)
+        return 1
+
+    # Check that output directory is writable.
+    if not os.access(args.output, os.W_OK):
+        logger.error("Output directory is not writable: %s", args.output)
+        return 1
+
+    if not args.no_merge:
+        # The default, write out a merged file.
+        write_merged(
+            os.path.join(args.output, DEFAULT_OUTPUT_RULE_FILENAME), rulemap)
+    else:
+        write_to_directory(args.output, files, rulemap)
 
     if args.yaml_fragment:
         file_tracker.add(args.yaml_fragment)

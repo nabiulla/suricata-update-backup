@@ -23,6 +23,12 @@ Options
 
    Be more verbose.
 
+.. option:: -o, --output
+
+   The directory to output the rules to.
+
+   Default: */var/lib/suricata/rules*
+
 .. option:: -t <directory>, --temp-dir=<directory>
 
    Temporary working directory (default: /var/tmp/suricata-update).
@@ -46,15 +52,17 @@ Options
    be due to just recently downloaded, or the remote checksum matching
    the cached copy.
 
-.. option:: -o, --output
-
-   The directory where rule individual rules files will be written
-   to. One of ``-o`` or ``--merged`` is required.
-
 .. option:: --merged=<filename>
 
    Write a single file containing all rules. This can be used in
    addition to ``--output`` or instead of ``--output``.
+
+.. option:: --no-merge
+
+   Do not merge the rules into a single rule file.
+
+   *Warning: No attempt is made to resolve conflicts if 2 input rule
+    files have the same name.*
 
 .. option:: --yaml-fragment=<filename.yaml>
 

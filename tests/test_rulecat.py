@@ -86,7 +86,7 @@ class TestRulecat(unittest.TestCase):
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
             if os.path.exists("./tmp"):
                 shutil.rmtree("tmp")
-            os.makedirs("./tmp")
+            os.makedirs("./tmp/rules")
             subprocess.check_call(
                 ["/usr/bin/env", "python2",
                  "../bin/suricata-update",
@@ -96,7 +96,6 @@ class TestRulecat(unittest.TestCase):
                  "--local", "./rule-with-unicode.rules",
                  "--temp-dir", "./tmp",
                  "--force",
-                 "--merged", "./tmp/merged.rules",
                  "--output", "./tmp/rules/",
                  "--yaml-fragment", "./tmp/suricata-rules.yaml",
                  "--sid-msg-map", "./tmp/sid-msg.map",
@@ -124,7 +123,7 @@ class TestRulecat(unittest.TestCase):
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
             if os.path.exists("./tmp"):
                 shutil.rmtree("tmp")
-            os.makedirs("./tmp")
+            os.makedirs("./tmp/rules")
             subprocess.check_call(
                 ["/usr/bin/env", "python2",
                  "../bin/suricata-update",
@@ -134,7 +133,6 @@ class TestRulecat(unittest.TestCase):
                  "--local", "./rule-with-unicode.rules",
                  "--temp-dir", "./tmp",
                  "--force",
-                 "--merged", "./tmp/merged.rules",
                  "--output", "./tmp/rules/",
                  "--yaml-fragment", "./tmp/suricata-rules.yaml",
                  "--sid-msg-map", "./tmp/sid-msg.map",
