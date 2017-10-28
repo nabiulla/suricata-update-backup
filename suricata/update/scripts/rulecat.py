@@ -311,7 +311,7 @@ class Fetch(object):
     def get_tmp_filename(self, url):
         url_hash = hashlib.md5(url.encode("utf-8")).hexdigest()
         return os.path.join(
-            self.args.temp_dir,
+            self.args.cache_dir,
             "%s-%s" % (url_hash, self.url_basename(url)))
 
     def fetch(self, url):
@@ -325,8 +325,8 @@ class Fetch(object):
             if self.check_checksum(tmp_filename, url):
                 logger.info("Remote checksum has not changed. Not fetching.")
                 return self.extract_files(tmp_filename)
-        if not os.path.exists(self.args.temp_dir):
-            os.makedirs(self.args.temp_dir)
+        if not os.path.exists(self.args.cache_dir):
+            os.makedirs(self.args.cache_dir)
         logger.info("Fetching %s." % (url))
         suricata.update.net.get(
             url,
@@ -735,9 +735,8 @@ def main():
                         help="Directory to write rules to")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Be more verbose")
-    parser.add_argument("-t", "--temp-dir", default="/var/tmp/idstools-rulecat",
-                        metavar="<directory>",
-                        help="Temporary work directory")
+    parser.add_argument("--cache-dir", default="/var/lib/suricata/cache",
+                        metavar="<directory>", help="set the cache directory")
     parser.add_argument("--suricata", default=suricata_path,
                         metavar="<path>",
                         help="Path to Suricata program (default: %s)" %

@@ -94,7 +94,7 @@ class TestRulecat(unittest.TestCase):
                  "file://%s/emerging.rules.tar.gz" % (
                      os.getcwd()),
                  "--local", "./rule-with-unicode.rules",
-                 "--temp-dir", "./tmp",
+                 "--cache-dir", "./tmp",
                  "--force",
                  "--output", "./tmp/rules/",
                  "--yaml-fragment", "./tmp/suricata-rules.yaml",
@@ -131,7 +131,7 @@ class TestRulecat(unittest.TestCase):
                  "file://%s/emerging.rules.tar.gz" % (
                      os.getcwd()),
                  "--local", "./rule-with-unicode.rules",
-                 "--temp-dir", "./tmp",
+                 "--cache-dir", "./tmp",
                  "--force",
                  "--output", "./tmp/rules/",
                  "--yaml-fragment", "./tmp/suricata-rules.yaml",

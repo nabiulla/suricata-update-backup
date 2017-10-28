@@ -29,11 +29,12 @@ Options
 
    Default: */var/lib/suricata/rules*
 
-.. option:: -t <directory>, --temp-dir=<directory>
+.. option:: --cache-dir <directory>
 
-   Temporary working directory (default: /var/tmp/suricata-update).
+   Directory where files are cached, such as files downloaded from a
+   URL.
 
-   This is where downloaded files will be stored.
+   Default: */var/lib/suricata/cache*
 
 .. option:: --suricata=<path>
 
