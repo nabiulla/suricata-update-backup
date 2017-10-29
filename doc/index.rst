@@ -62,8 +62,7 @@ Options
 
    Do not merge the rules into a single rule file.
 
-   *Warning: No attempt is made to resolve conflicts if 2 input rule
-    files have the same name.*
+   *Warning: No attempt is made to resolve conflicts if 2 input rule files have the same name.*
 
 .. option:: --yaml-fragment=<filename.yaml>
 
@@ -223,19 +222,19 @@ Example Configuration Files
 Example Configuration to Enable Rules (--enable)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../suricata/update/rulecat/configs/enable.conf
+.. literalinclude:: ../suricata/update/configs/enable.conf
 
 Example Configuration to Enable Disable (--disable)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../suricata/update/rulecat/configs/disable.conf
+.. literalinclude:: ../suricata/update/configs/disable.conf
 
 Example Configuration to convert Rules to Drop (--drop)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../suricata/update/rulecat/configs/drop.conf
+.. literalinclude:: ../suricata/update/configs/drop.conf
 
 Example Configuration to modify Rules (--modify)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../suricata/update/rulecat/configs/modify.conf
+.. literalinclude:: ../suricata/update/configs/modify.conf

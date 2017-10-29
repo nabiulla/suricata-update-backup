@@ -3,7 +3,7 @@ from setuptools import setup
 import suricata.update
 
 setup(
-    name="suricata-updater",
+    name="suricata-update",
     version=suricata.update.version,
     description="Suricata Update Tool",
     author="Jason Ish",
@@ -11,8 +11,7 @@ setup(
     packages=[
         "suricata",
         "suricata.update",
-        "suricata.update.rulecat",
-        "suricata.update.rulecat.configs",
+        "suricata.update.configs",
         "suricata.update.scripts",
         "suricata.update.compat",
         "suricata.update.compat.argparse",

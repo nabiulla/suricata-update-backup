@@ -8,5 +8,5 @@ import os
 sys.path.insert(
     0, os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0]))))
 
-from suricata.update.scripts.rulecat import main
-sys.exit(main())
+import suricata.update.main
+sys.exit(suricata.update.main.main())

@@ -67,11 +67,11 @@ if sys.argv[0] == __file__:
         0, os.path.abspath(os.path.join(__file__, "..", "..", "..")))
 
 import suricata.update.rule
-import suricata.update.suricata
+import suricata.update.engine
 import suricata.update.net
-from suricata.update.rulecat import configs
-from suricata.update.rulecat.loghandler import SuriColourLogHandler
-from suricata.update.rulecat import extract
+from suricata.update import configs
+from suricata.update.loghandler import SuriColourLogHandler
+from suricata.update import extract
 
 # Initialize logging, use colour if on a tty.
 if len(logging.root.handlers) == 0 and os.isatty(sys.stderr.fileno()):
@@ -758,7 +758,7 @@ def main():
             logger.info("Loading ./rulecat.conf.")
             sys.argv.insert(1, "@./rulecat.conf")
 
-    suricata_path = suricata.update.suricata.get_path()
+    suricata_path = suricata.update.engine.get_path()
 
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
     parser.add_argument("-o", "--output", metavar="<directory>",
@@ -857,14 +857,15 @@ def main():
         args.ignore.append("*deleted.rules")
 
     if args.suricata_version:
-        suricata_version = suricata.update.suricata.parse_version(args.suricata_version)
+        suricata_version = suricata.update.engine.parse_version(
+            args.suricata_version)
         if not suricata_version:
             logger.error("Failed to parse provided Suricata version: %s" % (
                 suricata_version))
             return 1
         logger.info("Forcing Suricata version to %s." % (suricata_version.full))
     elif args.suricata and os.path.exists(args.suricata):
-        suricata_version = suricata.update.suricata.get_version(args.suricata)
+        suricata_version = suricata.update.engine.get_version(args.suricata)
         if suricata_version:
             logger.info("Found Suricata version %s at %s." % (
                 str(suricata_version.full), args.suricata))
