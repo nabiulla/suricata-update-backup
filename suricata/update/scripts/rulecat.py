@@ -56,6 +56,12 @@ import shutil
 import glob
 import io
 
+try:
+    import yaml
+except:
+    print("error: pyyaml is required")
+    sys.exit(1)
+
 if sys.argv[0] == __file__:
     sys.path.insert(
         0, os.path.abspath(os.path.join(__file__, "..", "..", "..")))
@@ -718,6 +724,31 @@ def ignore_file(ignore_files, filename):
             return True
     return False
 
+class Config:
+
+    DEFAULT_LOCATIONS = [
+        "./update.yaml",
+        "/etc/suricata/update.yaml",
+    ]
+
+    def __init__(self, args):
+        self.args = args
+        self.config = {}
+
+    def load(self):
+        for path in self.DEFAULT_LOCATIONS:
+            if os.path.exists(path):
+                with open(path) as fileobj:
+                    config = yaml.load(fileobj)
+                    self.config.update(config)
+
+    def get(self, key):
+        if hasattr(self.args, key) and getattr(self.args, key) != None:
+            return getattr(self.args, key)
+        if key in self.config:
+            return self.config[key]
+        return None
+
 def main():
     global args
 
@@ -815,6 +846,9 @@ def main():
     if args.dump_sample_configs:
         return dump_sample_configs()
 
+    config = Config(args)
+    config.load()
+
     # If --no-ignore was provided, make sure args.ignore is
     # empty. Otherwise if no ignores are provided, set a sane default.
     if args.no_ignore:
@@ -853,14 +887,21 @@ def main():
     modify_filters = []
     drop_filters = []
 
-    if args.disable and os.path.exists(args.disable):
-        disable_matchers += load_matchers(args.disable)
-    if args.enable and os.path.exists(args.enable):
-        enable_matchers += load_matchers(args.enable)
-    if args.modify and os.path.exists(args.modify):
-        modify_filters += load_filters(args.modify)
-    if args.drop and os.path.exists(args.drop):
-        drop_filters += load_drop_filters(args.drop)
+    # Load user provided disable filters.
+    if config.get("disable") != None and os.path.exists(config.get("disable")):
+        disable_matchers += load_matchers(config.get("disable"))
+
+    # Load user provided enable filters.
+    if config.get("enable") != None and os.path.exists(config.get("enable")):
+        enable_matchers += load_matchers(config.get("enable"))
+
+    # Load user provided modify filters.
+    if config.get("modify") != None and os.path.exists(config.get("modify")):
+        modify_filters += load_filters(config.get("modify"))
+
+    # Load user provided drop filters.
+    if config.get("drop") != None and os.path.exists(config.get("drop")):
+        drop_filters += load_drop_filters(config.get("drop"))
 
     files = Fetch(args).run()
 
