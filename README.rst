@@ -8,4 +8,4 @@ Forked from the idstools-rulecat tool...
 Installation
 ------------
 
-    pip install https://github.com/jasonish/suricata-updater/archive/master.zip
+    pip install https://github.com/jasonish/suricata-update/archive/master.zip
