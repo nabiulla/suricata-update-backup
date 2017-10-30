@@ -998,7 +998,7 @@ def main():
     # Check that the cache directory exists and is writable.
     if not os.path.exists(args.cache_dir):
         try:
-            os.makedirs(args.cache_dir, mode=0770)
+            os.makedirs(args.cache_dir, mode=770)
         except Exception as err:
             logger.warning(
                 "Cache directory does exist and could not be created. /var/tmp will be used instead.")
@@ -1081,7 +1081,7 @@ def main():
     # Check that output directory exists.
     if not os.path.exists(args.output):
         try:
-            os.makedirs(args.output, mode=0770)
+            os.makedirs(args.output, mode=770)
         except Exception as err:
             logger.error(
                 "Output directory does not exist and could not be created: %s",
