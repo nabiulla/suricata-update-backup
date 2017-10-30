@@ -121,17 +121,23 @@ Options
 
    See :ref:`example-drop-conf`
 
-.. option:: --ignore=<filename>
+.. option:: --ignore=<pattern>
 
    Filenames to ignore. This is a pattern that will be matched against
    the basename of a rule files.
 
    This argument may be specified multiple times.
 
-   Default: *deleted.rules*
+   Default: *\*deleted.rules*
 
-   Alternatively the **group** matcher may be used in the file passed
-   to ``--disable``.
+   Example::
+
+     --ignore dnp3-events.rules --ignore deleted.rules --ignore "modbus*"
+
+   .. note::
+
+     If specified the default value of *\*deleted.rules* will no longer
+     be used, so add it as an extra ignore if needed.
 
 .. option:: --no-ignore
 

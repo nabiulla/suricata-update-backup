@@ -850,9 +850,9 @@ def main():
     parser.add_argument("--drop-conf", metavar="<filename>",
                         help="Filename of drop rules filters")
 
-    parser.add_argument("--ignore", metavar="<filename>", action="append",
+    parser.add_argument("--ignore", metavar="<pattern>", action="append",
                         default=[],
-                        help="Filenames to ignore (default: *deleted.rules)")
+                        help="Filenames to ignore (can be specified multiple times; default: *deleted.rules)")
     parser.add_argument("--no-ignore", action="store_true", default=False,
                         help="Disables the ignore option.")
 
@@ -958,16 +958,16 @@ def main():
 
     files = Fetch(args).run()
 
+    load_dist_rules(files)
+
+    for path in args.local:
+        load_local(path, files)
+
     # Remove ignored files.
     for filename in list(files.keys()):
         if ignore_file(args.ignore, filename):
             logger.info("Ignoring file %s" % (filename))
             del(files[filename])
-
-    load_dist_rules(files)
-
-    for path in args.local:
-        load_local(path, files)
 
     rules = []
     for filename in files:
