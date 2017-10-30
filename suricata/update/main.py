@@ -771,6 +771,8 @@ def resolve_etopen_url(suricata_version):
     return ET_OPEN_URL % mappings
 
 def ignore_file(ignore_files, filename):
+    if not ignore_files:
+        return False
     for pattern in ignore_files:
         if fnmatch.fnmatch(os.path.basename(filename), pattern):
             return True
@@ -779,15 +781,27 @@ def ignore_file(ignore_files, filename):
 class Config:
 
     DEFAULT_LOCATIONS = [
-        "./update.yaml",
         "/etc/suricata/update.yaml",
     ]
+
+    DEFAULTS = {
+        "disable-conf": "/etc/suricata/disable.conf",
+        "enable-conf": "/etc/suricata/enable.conf",
+        "drop-conf": "/etc/suricata/drop.conf",
+        "modify-conf": "/etc/suricata/modify.conf",
+    }
 
     def __init__(self, args):
         self.args = args
         self.config = {}
+        self.config.update(self.DEFAULTS)
 
     def load(self):
+        if self.args.config:
+            with open(self.args.config) as fileobj:
+                config = yaml.load(fileobj)
+                self.config.update(config)
+            return
         for path in self.DEFAULT_LOCATIONS:
             if os.path.exists(path):
                 with open(path) as fileobj:
@@ -796,28 +810,31 @@ class Config:
 
     def get(self, key):
         if hasattr(self.args, key) and getattr(self.args, key) != None:
-            return getattr(self.args, key)
+            val = getattr(self.args, key)
+            if not val in [[], None]:
+                return getattr(self.args, key)
         if key in self.config:
             return self.config[key]
         return None
 
+    def set(self, key, val):
+        self.config[key] = val
+
 def main():
     global args
 
-    conf_filenames = [arg for arg in sys.argv if arg.startswith("@")]
-    if not conf_filenames:
-        if os.path.exists("./rulecat.conf"):
-            logger.info("Loading ./rulecat.conf.")
-            sys.argv.insert(1, "@./rulecat.conf")
-
     suricata_path = suricata.update.engine.get_path()
 
+    # Support the Python argparse style of configuration file.
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
+
+    parser.add_argument("-v", "--verbose", action="store_true", default=False,
+                        help="Be more verbose")
+    parser.add_argument("-c", "--config", metavar="<filename>",
+                        help="Configuration file")
     parser.add_argument("-o", "--output", metavar="<directory>",
                         dest="output", default="/var/lib/suricata/rules",
                         help="Directory to write rules to")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                        help="Be more verbose")
     parser.add_argument("--cache-dir", default="/var/lib/suricata/cache",
                         metavar="<directory>", help="set the cache directory")
     parser.add_argument("--suricata", default=suricata_path,
@@ -899,14 +916,19 @@ def main():
         return dump_sample_configs()
 
     config = Config(args)
-    config.load()
+    try:
+        config.load()
+    except Exception as err:
+        logger.error("Failed to load configuration: %s" % (err))
+        return 1
 
     # If --no-ignore was provided, make sure args.ignore is
     # empty. Otherwise if no ignores are provided, set a sane default.
+
     if args.no_ignore:
-        args.ignore = []
-    elif len(args.ignore) == 0:
-        args.ignore.append("*deleted.rules")
+        config.set("ignore", [])
+    elif not config.get("ignore"):
+        config.set("ignore", ["*deleted.rules"])
 
     if args.suricata_version:
         suricata_version = suricata.update.engine.parse_version(
@@ -965,7 +987,7 @@ def main():
 
     # Remove ignored files.
     for filename in list(files.keys()):
-        if ignore_file(args.ignore, filename):
+        if ignore_file(config.get("ignore"), filename):
             logger.info("Ignoring file %s" % (filename))
             del(files[filename])
 

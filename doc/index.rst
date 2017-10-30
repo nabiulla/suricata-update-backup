@@ -23,6 +23,12 @@ Options
 
    Be more verbose.
 
+.. option:: -c <filename>, --config <filename>
+   
+   Path to the suricata-update config file.
+
+   Default: */etc/suricata/update.yaml*
+
 .. option:: -o, --output
 
    The directory to output the rules to.
@@ -232,6 +238,35 @@ point *suricata-update* at a configuration with the command
 
 Example Configuration Files
 ---------------------------
+
+Example Configuration File (/etc/suricata/update.yaml)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: yaml
+
+   # Configuration with disable filters.
+   # - Overrided by --disable-conf
+   # - Default: /etc/suricata/disable.conf
+   disable-conf: /etc/suricata/disable.conf
+
+   # Configuration with enable filters.
+   # - Overrided by --enable-conf
+   # - Default: /etc/suricata/enable.conf
+   enable-conf: /etc/suricata/enable.conf
+
+   # Configuration with drop filters.
+   # - Overrided by --drop-conf
+   # - Default: /etc/suricata/drop.conf
+   drop-conf: /etc/suricata/drop.conf
+
+   # Configuration with modify filters.
+   # - Overrided by --modify-conf
+   # - Default: /etc/suricata/modify.conf
+   modify-conf: /etc/suricata/modify.conf
+
+   # List of files to ignore. Overrided by the --ignore command line option.
+   ignore:
+     - "*deleted.rules"
 
 .. _example-enable-conf:
 

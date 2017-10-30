@@ -1,4 +1,4 @@
-# idstools-rulecat - threshold.in
+# suricata-update - threshold.in
 
 # This file contains thresholding configurations that will be turned into
 # a Suricata compatible threshold.conf file.
