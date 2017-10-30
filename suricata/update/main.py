@@ -744,13 +744,9 @@ def resolve_etpro_url(etpro, suricata_version):
         "enhanced": "",
     }
 
-    if not suricata_version:
-        mappings["version"] = "-1.3"
-    elif suricata_version.major < 2 and suricata_version.minor < 3:
-        mappings["version"] = "-1.0"
-    else:
-        mappings["version"] = "-1.3"
-        mappings["enhanced"] = "-enhanced"
+    mappings["version"] = "-%d.%d" % (suricata_version.major,
+                                      suricata_version.minor)
+    mappings["enhanced"] = "-enhanced"
 
     return ET_PRO_URL % mappings
 
@@ -760,13 +756,10 @@ def resolve_etopen_url(suricata_version):
         "enhanced": "",
     }
 
-    if not suricata_version:
-        mappings["version"] = "-1.3"
-    elif suricata_version.major < 2 and suricata_version.minor < 3:
-        mappings["version"] = "-1.0"
-    else:
-        mappings["version"] = "-1.3"
-        mappings["enhanced"] = "-enhanced"
+    # For now just assume 1.3-enhanced as the ET open set doesn't
+    # resolve enhanced URLs for other version.
+    mappings["version"] = "-1.3"
+    mappings["enhanced"] = "-enhanced"
 
     return ET_OPEN_URL % mappings
 
@@ -846,10 +839,8 @@ def main():
                         help="Directory to write rules to")
     parser.add_argument("--cache-dir", default="/var/lib/suricata/cache",
                         metavar="<directory>", help="set the cache directory")
-    parser.add_argument("--suricata", default=suricata_path,
-                        metavar="<path>",
-                        help="Path to Suricata program (default: %s)" %
-                        suricata_path)
+    parser.add_argument("--suricata", metavar="<path>",
+                        help="Path to Suricata program")
     parser.add_argument("--suricata-version", metavar="<version>",
                         help="Override Suricata version")
     parser.add_argument("-f", "--force", action="store_true", default=False,
@@ -939,22 +930,35 @@ def main():
     elif not config.get("ignore"):
         config.set("ignore", ["*deleted.rules"])
 
+    # Check for Suricata binary...
+    if args.suricata:
+        if not os.path.exists(args.suricata):
+            logger.error("Specified path to suricata does not exist: %s",
+                     args.suricata)
+            return 1
+        suricata_path = args.suricata
+    else:
+        suricata_path = suricata.update.engine.get_path()
+        if not suricata_path:
+            logger.warning("No suricata application binary found on path.")
+
     if args.suricata_version:
+        # The Suricata version was passed on the command line, parse it.
         suricata_version = suricata.update.engine.parse_version(
             args.suricata_version)
         if not suricata_version:
             logger.error("Failed to parse provided Suricata version: %s" % (
-                suricata_version))
+                args.suricata_version))
             return 1
         logger.info("Forcing Suricata version to %s." % (suricata_version.full))
-    elif args.suricata and os.path.exists(args.suricata):
+    elif suricata_path:
         suricata_version = suricata.update.engine.get_version(args.suricata)
         if suricata_version:
             logger.info("Found Suricata version %s at %s." % (
-                str(suricata_version.full), args.suricata))
+                str(suricata_version.full), suricata_path))
         else:
-            logger.warn("Failed to get Suricata version.")
-            suricata_version = None
+            logger.error("Failed to get Suricata version.")
+            return 1
     else:
         suricata_version = None
 

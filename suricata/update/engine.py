@@ -59,6 +59,8 @@ SuricataVersion = namedtuple(
 def get_path(program="suricata"):
     """Find Suricata in the shell path."""
     for path in os.environ["PATH"].split(os.pathsep):
+        if not path:
+            continue
         suricata_path = os.path.join(path, program)
         logger.debug("Testing path: %s" % (path))
         if os.path.exists(suricata_path):
