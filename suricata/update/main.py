@@ -842,21 +842,16 @@ def test_suricata(config, suricata_path):
                 config.get("output"), DEFAULT_OUTPUT_RULE_FILENAME)
         rc = subprocess.Popen(test_command, shell=True, env=env).wait()
         if rc != 0:
-            logger.error("Suricata test failed, aborting.")
             return False
     else:
         if not config.get("no-merge"):
             if not suricata.update.engine.test_configuration(
                     suricata_path, os.path.join(
                         config.get("output"), DEFAULT_OUTPUT_RULE_FILENAME)):
-                logger.error(
-                    "Suricata test failed. Rules will not be reloaded.")
-                return 1
+                return False
         else:
             if not suricata.update.engine.test_configuration(
                     suricata_path):
-                logger.error(
-                    "Suricata test failed. Rules will not be reloaded.")
                 return False
 
     return True
