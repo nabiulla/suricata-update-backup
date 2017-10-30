@@ -488,6 +488,8 @@ def load_dist_rules(files):
             return
         for filename in filenames:
             path = os.path.join(dist_rule_path, filename)
+            if not os.path.exists(path):
+                continue
             if not os.access(path, os.R_OK):
                 logger.warning("Distribution rule file not readable: %s",
                                path)
