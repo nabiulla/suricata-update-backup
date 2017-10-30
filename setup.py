@@ -12,7 +12,6 @@ setup(
         "suricata",
         "suricata.update",
         "suricata.update.configs",
-        "suricata.update.scripts",
         "suricata.update.compat",
         "suricata.update.compat.argparse",
     ],
