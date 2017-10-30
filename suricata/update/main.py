@@ -808,13 +808,22 @@ class Config:
                     config = yaml.load(fileobj)
                     self.config.update(config)
 
-    def get(self, key):
+    def get_arg(self, key):
+        key = key.replace("-", "_")
         if hasattr(self.args, key) and getattr(self.args, key) != None:
             val = getattr(self.args, key)
             if not val in [[], None]:
                 return getattr(self.args, key)
+        return None
+
+    def get(self, key):
+        val = self.get_arg(key)
+        if val:
+            return val
+
         if key in self.config:
             return self.config[key]
+
         return None
 
     def set(self, key, val):
@@ -963,20 +972,37 @@ def main():
     drop_filters = []
 
     # Load user provided disable filters.
-    if config.get("disable-conf") and os.path.exists(config.get("disable-conf")):
-        disable_matchers += load_matchers(config.get("disable-conf"))
+    disable_conf_filename = config.get("disable-conf")
+    if os.path.exists(disable_conf_filename):
+        logger.info("Loading %s.", disable_conf_filename)
+        disable_matchers += load_matchers(disable_conf_filename)
 
     # Load user provided enable filters.
-    if config.get("enable-conf") and os.path.exists(config.get("enable-conf")):
-        enable_matchers += load_matchers(config.get("enable-conf"))
+    enable_conf_filename = config.get("enable-conf")
+    if os.path.exists(enable_conf_filename):
+        logger.info("Loading %s.", enable_conf_filename)
+        enable_matchers += load_matchers(enable_conf_filename)
 
     # Load user provided modify filters.
-    if config.get("modify-conf") and os.path.exists(config.get("modify-conf")):
-        modify_filters += load_filters(config.get("modify-conf"))
+    modify_conf_filename = config.get("modify-conf")
+    if os.path.exists(modify_conf_filename):
+        logger.info("Loading %s.", modify_conf_filename)
+        modify_filters += load_filters(modify_conf_filename)
 
     # Load user provided drop filters.
-    if config.get("drop-conf") and os.path.exists(config.get("drop-conf")):
-        drop_filters += load_drop_filters(config.get("drop-conf"))
+    drop_conf_filename = config.get("drop-conf")
+    if os.path.exists(drop_conf_filename):
+        logger.info("Loading %s.", drop_conf_filename)
+        drop_filters += load_drop_filters(drop_conf_filename)
+
+    # Check that the cache directory exists and is writable.
+    if not os.path.exists(args.cache_dir):
+        try:
+            os.makedirs(args.cache_dir, mode=0770)
+        except Exception as err:
+            logger.warning(
+                "Cache directory does exist and could not be created. /var/tmp will be used instead.")
+            args.cache_dir = "/var/tmp"
 
     files = Fetch(args).run()
 
@@ -1054,8 +1080,13 @@ def main():
 
     # Check that output directory exists.
     if not os.path.exists(args.output):
-        logger.error("Output directory does not exist: %s", args.output)
-        return 1
+        try:
+            os.makedirs(args.output, mode=0770)
+        except Exception as err:
+            logger.error(
+                "Output directory does not exist and could not be created: %s",
+                args.output)
+            return 1
 
     # Check that output directory is writable.
     if not os.access(args.output, os.W_OK):
