@@ -77,9 +77,7 @@ Options
 
 .. option:: --local=<filename or directory>
 
-   A path to a filename or directory of local rule files to
-   include. May be specified multiple times and should not include
-   files in the output path.
+   A path to a filename or directory of local rule files to include.
 
    If the path is a directory all files ending in *.rules* will be
    loaded.
@@ -88,6 +86,8 @@ Options
    must be quoted, for example::
 
      --local '/etc/suricata/custom-*.rules'
+
+   This option can be specified multiple times.
 
 .. option:: --sid-msg-map=<filename>
 

@@ -785,7 +785,7 @@ def main():
                         help="Output YAML fragment for rule inclusion")
     parser.add_argument("--url", metavar="<url>", action="append",
                         default=[],
-                        help="URL to use instead of auto-generating one")
+                        help="URL to use instead of auto-generating one (can be specified multiple times)")
     parser.add_argument("--local", metavar="<path>", action="append",
                         default=[],
                         help="Local rule files or directories (can be specified multiple times)")
