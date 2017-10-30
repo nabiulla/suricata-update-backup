@@ -453,6 +453,53 @@ def load_local(local, files):
                 logger.error("Failed to open %s: %s" % (filename, err))
                 sys.exit(1)
 
+def load_dist_rules(files):
+    """Load the rule files provided by the Suricata distribution."""
+
+    # In the future hopefully we can just pull in all files from
+    # /usr/share/suricata/rules, but for now pull in the set of files
+    # known to have been provided by the Suricata source.
+    filenames = [
+        "app-layer-events.rules",
+        "decoder-events.rules",
+        "dnp3-events.rules",
+        "dns-events.rules",
+        "files.rules",
+        "http-events.rules",
+        "modbus-events.rules",
+        "nfs-events.rules",
+        "ntp-events.rules",
+        "smtp-events.rules",
+        "stream-events.rules",
+        "tls-events.rules",
+    ]
+
+    dist_rule_path = "/etc/suricata/rules"
+
+    if not os.path.exists(dist_rule_path):
+        logger.warning("Distribution rule directory not found: %s",
+                       dist_rule_path)
+        return
+
+    if os.path.exists(dist_rule_path):
+        if not os.access(dist_rule_path, os.R_OK):
+            logger.warning("Distribution rule path not readable: %s",
+                           dist_rule_path)
+            return
+        for filename in filenames:
+            path = os.path.join(dist_rule_path, filename)
+            if not os.access(path, os.R_OK):
+                logger.warning("Distribution rule file not readable: %s",
+                               path)
+                continue
+            logger.info("Loading rule file %s", path)
+            try:
+                with open(path, "rb") as fileobj:
+                    files[path] = fileobj.read()
+            except Exception as err:
+                logger.error("Failed to open %s: %s" % (path, err))
+                sys.exit(1)
+
 def build_report(prev_rulemap, rulemap):
     """Build a report of changes between 2 rulemaps.
 
@@ -916,6 +963,8 @@ def main():
         if ignore_file(args.ignore, filename):
             logger.info("Ignoring file %s" % (filename))
             del(files[filename])
+
+    load_dist_rules(files)
 
     for path in args.local:
         load_local(path, files)
