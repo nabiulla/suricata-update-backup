@@ -98,3 +98,17 @@ def get_version(path=None):
     if output:
         return parse_version(output)
     return None
+
+def test_configuration(path, rule_filename=None):
+    """Test the Suricata configuration with -T."""
+    test_command = [
+        path,
+        "-T",
+        "-l", "/tmp",
+    ]
+    if rule_filename:
+        test_command += ["-S", rule_filename]
+    rc = subprocess.Popen(test_command).wait()
+    if rc == 0:
+        return True
+    return False

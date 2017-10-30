@@ -180,6 +180,16 @@ Options
 
    Specify the name of the processed threshold.conf to output.
 
+.. option:: -T <command>, --test-command <command>
+
+   Specifies a custom test command to test the rules before reloading
+   Suricata. This overrides the default command and can also be
+   specified in the configuration file under ``test-command``.
+
+.. option:: --no-test
+
+   Disables the test command and proceed as if it had passed.
+
 .. option:: --post-hook=<command>
 
    A command to run after the rules have been updated; will not run if
@@ -267,6 +277,15 @@ Example Configuration File (/etc/suricata/update.yaml)
    # List of files to ignore. Overrided by the --ignore command line option.
    ignore:
      - "*deleted.rules"
+
+   # Provide an alternate command to the default test command.
+   #
+   # The following environment variables can be used.
+   # SURICATA_PATH - The path to the discovered suricata program.
+   # OUTPUT_DIR - The directory the rules are written to.
+   # OUTPUT_FILENAME - The name of the rule file. Will be empty if the rules
+   #                   were not merged.
+   #test-command: ${SURICATA_PATH} -T -S ${OUTPUT_FILENAME} -l /tmp
 
 .. _example-enable-conf:
 

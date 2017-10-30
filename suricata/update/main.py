@@ -824,6 +824,43 @@ class Config:
     def set(self, key, val):
         self.config[key] = val
 
+def test_suricata(config, suricata_path):
+    if config.get("no-test"):
+        logger.info("Skipping test, disabled by configuration.")
+        return True
+
+    if config.get("test-command"):
+        test_command = config.get("test-command")
+        logger.info("Testing Suricata configuration with: %s" % (
+            test_command))
+        env = {
+            "SURICATA_PATH": suricata_path,
+            "OUTPUT_DIR": config.get("output"),
+        }
+        if not config.get("no-merge"):
+            env["OUTPUT_FILENAME"] = os.path.join(
+                config.get("output"), DEFAULT_OUTPUT_RULE_FILENAME)
+        rc = subprocess.Popen(test_command, shell=True, env=env).wait()
+        if rc != 0:
+            logger.error("Suricata test failed, aborting.")
+            return False
+    else:
+        if not config.get("no-merge"):
+            if not suricata.update.engine.test_configuration(
+                    suricata_path, os.path.join(
+                        config.get("output"), DEFAULT_OUTPUT_RULE_FILENAME)):
+                logger.error(
+                    "Suricata test failed. Rules will not be reloaded.")
+                return 1
+        else:
+            if not suricata.update.engine.test_configuration(
+                    suricata_path):
+                logger.error(
+                    "Suricata test failed. Rules will not be reloaded.")
+                return False
+
+    return True
+
 def main():
     global args
 
@@ -893,6 +930,8 @@ def main():
                         help="Command to run after update if modified")
     parser.add_argument("-T", "--test-command", metavar="<command>",
                         help="Command to test Suricata configuration")
+    parser.add_argument("--no-test", action="store_true", default=False,
+                        help="Disable testing rules with Suricata")
     parser.add_argument("-V", "--version", action="store_true", default=False,
                         help="Display version")
 
@@ -979,25 +1018,25 @@ def main():
 
     # Load user provided disable filters.
     disable_conf_filename = config.get("disable-conf")
-    if os.path.exists(disable_conf_filename):
+    if disable_conf_filename and os.path.exists(disable_conf_filename):
         logger.info("Loading %s.", disable_conf_filename)
         disable_matchers += load_matchers(disable_conf_filename)
 
     # Load user provided enable filters.
     enable_conf_filename = config.get("enable-conf")
-    if os.path.exists(enable_conf_filename):
+    if enable_conf_filename and os.path.exists(enable_conf_filename):
         logger.info("Loading %s.", enable_conf_filename)
         enable_matchers += load_matchers(enable_conf_filename)
 
     # Load user provided modify filters.
     modify_conf_filename = config.get("modify-conf")
-    if os.path.exists(modify_conf_filename):
+    if modify_conf_filename and os.path.exists(modify_conf_filename):
         logger.info("Loading %s.", modify_conf_filename)
         modify_filters += load_filters(modify_conf_filename)
 
     # Load user provided drop filters.
     drop_conf_filename = config.get("drop-conf")
-    if os.path.exists(drop_conf_filename):
+    if drop_conf_filename and os.path.exists(drop_conf_filename):
         logger.info("Loading %s.", drop_conf_filename)
         drop_filters += load_drop_filters(drop_conf_filename)
 
@@ -1101,9 +1140,14 @@ def main():
 
     if not args.no_merge:
         # The default, write out a merged file.
-        write_merged(
-            os.path.join(args.output, DEFAULT_OUTPUT_RULE_FILENAME), rulemap)
+        output_filename = os.path.join(
+            args.output, DEFAULT_OUTPUT_RULE_FILENAME)
+        file_tracker.add(output_filename)
+        write_merged(os.path.join(output_filename), rulemap)
     else:
+        for filename in files:
+            file_tracker.add(
+                os.path.join(args.output, os.path.basename(filename)))
         write_to_directory(args.output, files, rulemap)
 
     if args.yaml_fragment:
@@ -1122,17 +1166,12 @@ def main():
             open(args.threshold_in), open(args.threshold_out, "w"), rulemap)
 
     if not args.force and not file_tracker.any_modified():
-        logger.info(
-            "No changes detected, will not reload rules or run post-hooks.")
+        logger.info("No changes detected, exiting.")
         return 0
 
-    if args.test_command:
-        logger.info("Testing Suricata configuration with: %s" % (
-            args.test_command))
-        rc = subprocess.Popen(args.test_command, shell=True).wait()
-        if rc != 0:
-            logger.error("Suricata test failed, aborting.")
-            return 1
+    if not test_suricata(config, suricata_path):
+        logger.error("Suricata test failed, aborting.")
+        return 1
 
     if args.post_hook:
         logger.info("Running %s." % (args.post_hook))
