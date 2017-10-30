@@ -97,21 +97,29 @@ Options
 
    Output a v2 style sid-msg.map file.
 
-.. option:: --disable=<disable.conf>
+.. option:: --disable-conf=<disable.conf>
 
-   Specify the configuration file for disabling rules.
+   Specify the configuration file for disable filters.
 
-.. option:: --enable=<enable.conf>
+   See :ref:`example-disable-conf`
 
-   Specify the configuration file for enabling rules.
+.. option:: --enable-conf=<enable.conf>
 
-.. option:: --modify=<modify.conf>
+   Specify the configuration file for enable rules.
 
-   Specify the configuration file for rule modifications.
+   See :ref:`example-enable-conf`
 
-.. option:: --drop=<drop.conf>
+.. option:: --modify-conf=<modify.conf>
 
-   Specify the configuration file for rules to change to drop.
+   Specify the configuration file for rule modification filters.
+
+   See :ref:`example-modify-conf`
+
+.. option:: --drop-conf=<drop.conf>
+
+   Specify the configuration file for drop filters.
+
+   See :ref:`example-drop-conf`
 
 .. option:: --ignore=<filename>
 
@@ -219,22 +227,30 @@ point *suricata-update* at a configuration with the command
 Example Configuration Files
 ---------------------------
 
-Example Configuration to Enable Rules (--enable)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _example-enable-conf:
+
+Example Configuration to Enable Rules (--enable-conf)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../suricata/update/configs/enable.conf
 
-Example Configuration to Enable Disable (--disable)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _example-disable-conf:
+
+Example Configuration to Enable Disable (--disable-conf)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../suricata/update/configs/disable.conf
 
-Example Configuration to convert Rules to Drop (--drop)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _example-drop-conf:
+
+Example Configuration to convert Rules to Drop (--drop-conf)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../suricata/update/configs/drop.conf
 
-Example Configuration to modify Rules (--modify)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _example-modify-conf:
+
+Example Configuration to modify Rules (--modify-conf)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../suricata/update/configs/modify.conf

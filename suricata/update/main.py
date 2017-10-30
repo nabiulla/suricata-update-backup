@@ -446,7 +446,12 @@ def load_local(local, files):
                 logger.warn(
                     "Local file %s overrides existing file of same name." % (
                         filename))
-            files[basename] = open(filename, "rb").read()
+            try:
+                with open(filename, "rb") as fileobj:
+                    files[basename] = fileobj.read()
+            except Exception as err:
+                logger.error("Failed to open %s: %s" % (filename, err))
+                sys.exit(1)
 
 def build_report(prev_rulemap, rulemap):
     """Build a report of changes between 2 rulemaps.
@@ -789,14 +794,14 @@ def main():
     parser.add_argument("--sid-msg-map-2", metavar="<filename>",
                         help="Generate a v2 sid-msg.map file")
 
-    parser.add_argument("--disable", metavar="<filename>",
-                        help="Filename of disable rule configuration")
-    parser.add_argument("--enable", metavar="<filename>",
-                        help="Filename of enable rule configuration")
-    parser.add_argument("--modify", metavar="<filename>",
-                        help="Filename of rule modification configuration")
-    parser.add_argument("--drop", metavar="<filename>",
-                        help="Filename of drop rules configuration")
+    parser.add_argument("--disable-conf", metavar="<filename>",
+                        help="Filename of rule disable filters")
+    parser.add_argument("--enable-conf", metavar="<filename>",
+                        help="Filename of rule enable filters")
+    parser.add_argument("--modify-conf", metavar="<filename>",
+                        help="Filename of rule modification filters")
+    parser.add_argument("--drop-conf", metavar="<filename>",
+                        help="Filename of drop rules filters")
 
     parser.add_argument("--ignore", metavar="<filename>", action="append",
                         default=[],
@@ -889,20 +894,20 @@ def main():
     drop_filters = []
 
     # Load user provided disable filters.
-    if config.get("disable") != None and os.path.exists(config.get("disable")):
-        disable_matchers += load_matchers(config.get("disable"))
+    if config.get("disable-conf") and os.path.exists(config.get("disable-conf")):
+        disable_matchers += load_matchers(config.get("disable-conf"))
 
     # Load user provided enable filters.
-    if config.get("enable") != None and os.path.exists(config.get("enable")):
-        enable_matchers += load_matchers(config.get("enable"))
+    if config.get("enable-conf") and os.path.exists(config.get("enable-conf")):
+        enable_matchers += load_matchers(config.get("enable-conf"))
 
     # Load user provided modify filters.
-    if config.get("modify") != None and os.path.exists(config.get("modify")):
-        modify_filters += load_filters(config.get("modify"))
+    if config.get("modify-conf") and os.path.exists(config.get("modify-conf")):
+        modify_filters += load_filters(config.get("modify-conf"))
 
     # Load user provided drop filters.
-    if config.get("drop") != None and os.path.exists(config.get("drop")):
-        drop_filters += load_drop_filters(config.get("drop"))
+    if config.get("drop-conf") and os.path.exists(config.get("drop-conf")):
+        drop_filters += load_drop_filters(config.get("drop-conf"))
 
     files = Fetch(args).run()
 
