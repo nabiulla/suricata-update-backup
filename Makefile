@@ -1,6 +1,5 @@
 .PHONY: doc
 
-# No default for now.
 all: build
 
 build:
@@ -8,9 +7,6 @@ build:
 
 install:
 	python setup.py install
-
-lint:
-	pylint idstools
 
 test:
 	@if which nosetests-3 2>&1 > /dev/null; then \
@@ -28,7 +24,7 @@ clean:
 	find . -name \*.pyc -print0 | xargs -0 rm -f
 	find . -name \*~ -print0 | xargs -0 rm -f
 	find . -name __pycache__ -type d -print0 | xargs -0 rm -rf
-	rm -rf idstools.egg*
+	rm -rf suricata_update.egg*
 	rm -rf build dist MANIFEST
 	cd doc && $(MAKE) clean
 
