@@ -41,14 +41,7 @@
 
 """ Module for utility functions that don't really fit anywhere else. """
 
-import sys
 import hashlib
-import socket
-import struct
-import tempfile
-import atexit
-import shutil
-import string
 
 def md5_hexdigest(filename):
     """ Compute the MD5 checksum for the contents of the provided filename.
@@ -58,39 +51,3 @@ def md5_hexdigest(filename):
     :returns: A string representing the hex value of the computed MD5.
     """
     return hashlib.md5(open(filename).read().encode()).hexdigest()
-
-def decode_inet_addr(addr):
-    if len(addr) == 4:
-        return socket.inet_ntoa(addr)
-    else:
-        parts = struct.unpack(">" + "H" * int(len(addr) / 2), addr)
-        return ":".join("%04x" % p for p in parts)
-
-def mktempdir(delete_on_exit=True):
-    """ Create a temporary directory that is removed on exit. """
-    tmpdir = tempfile.mkdtemp("idstools")
-    if delete_on_exit:
-        atexit.register(shutil.rmtree, tmpdir, ignore_errors=True)
-    return tmpdir
-
-def format_printable(data):
-    """Given a buffer, return a string with the printable characters. A
-    '.' will be used for all non-printable characters."""
-
-    chars = []
-
-    if sys.version_info.major == 2:
-        for byte in data:
-            if byte in string.printable:
-                chars.append(byte)
-            else:
-                chars.append(".")
-    else:
-        # Python 3.
-        for byte in data:
-            if chr(byte) in string.printable:
-                chars.append(chr(byte))
-            else:
-                chars.append(".")
-
-    return "".join(chars)
