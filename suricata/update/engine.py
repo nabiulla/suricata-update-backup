@@ -108,7 +108,14 @@ def test_configuration(path, rule_filename=None):
     ]
     if rule_filename:
         test_command += ["-S", rule_filename]
-    rc = subprocess.Popen(test_command).wait()
+
+    # This makes the Suricata output look just like suricata-udpate
+    # output.
+    env = {
+        "SC_LOG_FORMAT": "%t - <%d> -- ",
+    }
+
+    rc = subprocess.Popen(test_command, env=env).wait()
     if rc == 0:
         return True
     return False
