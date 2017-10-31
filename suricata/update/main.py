@@ -795,13 +795,15 @@ class Config:
         if self.args.config:
             with open(self.args.config) as fileobj:
                 config = yaml.load(fileobj)
-                self.config.update(config)
+                if config:
+                    self.config.update(config)
             return
         for path in self.DEFAULT_LOCATIONS:
             if os.path.exists(path):
                 with open(path) as fileobj:
                     config = yaml.load(fileobj)
-                    self.config.update(config)
+                    if config:
+                        self.config.update(config)
 
     def get_arg(self, key):
         key = key.replace("-", "_")

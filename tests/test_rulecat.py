@@ -90,6 +90,7 @@ class TestRulecat(unittest.TestCase):
             subprocess.check_call(
                 ["/usr/bin/env", "python2",
                  "../bin/suricata-update",
+                 "-c", "./update.yaml",
                  "--url",
                  "file://%s/emerging.rules.tar.gz" % (
                      os.getcwd()),
@@ -101,6 +102,7 @@ class TestRulecat(unittest.TestCase):
                  "--sid-msg-map", "./tmp/sid-msg.map",
                  "--sid-msg-map-2", "./tmp/sid-msg-v2.map",
                  "--no-test",
+                 "--reload-command", "true",
                 ],
                 stdout=open("./tmp/stdout", "wb"),
                 stderr=open("./tmp/stderr", "wb"),
@@ -128,6 +130,7 @@ class TestRulecat(unittest.TestCase):
             subprocess.check_call(
                 ["/usr/bin/env", "python2",
                  "../bin/suricata-update",
+                 "-c", "./update.yaml",
                  "--url",
                  "file://%s/emerging.rules.tar.gz" % (
                      os.getcwd()),
@@ -139,6 +142,7 @@ class TestRulecat(unittest.TestCase):
                  "--sid-msg-map", "./tmp/sid-msg.map",
                  "--sid-msg-map-2", "./tmp/sid-msg-v2.map",
                  "--no-test",
+                 "--reload-command", "true",
                 ],
                 stdout=open("./tmp/stdout", "wb"),
                 stderr=open("./tmp/stderr", "wb"),
