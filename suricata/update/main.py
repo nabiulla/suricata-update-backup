@@ -963,6 +963,8 @@ def main():
                        help="Be quiet, warning and error messages only")
     parser.add_argument("--reload-command", metavar="<command>",
                         help="Command to run after update if modified")
+    parser.add_argument("--no-reload", action="store_true", default=False,
+                        help="Disable reload")
     parser.add_argument("-T", "--test-command", metavar="<command>",
                         help="Command to test Suricata configuration")
     parser.add_argument("--no-test", action="store_true", default=False,
@@ -1216,7 +1218,7 @@ def main():
         copytree(os.path.join(backup_directory, "backup"), args.output)
         return 1
 
-    if config.get("reload-command"):
+    if not args.no_reload and config.get("reload-command"):
         logger.info("Running %s." % (config.get("reload-command")))
         rc = subprocess.Popen(config.get("reload-command"), shell=True).wait()
         if rc != 0:

@@ -199,6 +199,10 @@ Options
 
    will tell Suricata to reload its rules.
 
+.. option:: --no-reload
+
+   Disable Suricata rule reload.
+	    
 .. option:: -V, --version
 
    Display the version of **suricata-update**.
