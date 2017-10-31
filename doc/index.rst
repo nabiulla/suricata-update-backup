@@ -190,10 +190,10 @@ Options
 
    Disables the test command and proceed as if it had passed.
 
-.. option:: --post-hook=<command>
+.. option:: --reload-command=<command>
 
    A command to run after the rules have been updated; will not run if
-   not change to the output files was made.  For example::
+   no change to the output files was made.  For example::
 
      --post-hook=sudo kill -USR2 $(cat /var/run/suricata.pid)
 
@@ -202,49 +202,6 @@ Options
 .. option:: -V, --version
 
    Display the version of **suricata-update**.
-
-Examples
---------
-
-Download ET Open rules for the version of Suricata found on the path,
-saving the rules in /etc/suricata/rules::
-
-    suricata-update -o /etc/suricata/rules
-
-Download ET Pro rules for the version of Suricata found on the path,
-saving the rules in /etc/suricata/rules::
-
-    suricata-update --etpro XXXXXXXXXXXXXXXX -o /etc/suricata/rules
-
-Download ET open rules plus an additional rule files and save the
-rules in /etc/suricata/rules::
-
-    suricata-update --etopen \
-        --url https://sslbl.abuse.ch/blacklist/sslblacklist.rules \
-	-o /etc/suricata/rules
-
-Configuration File
-------------------
-
-Command line arguments can be put in a file, one per line and used as
-a configuration file.  By default, suricata-update will look for a
-file in the current directory named rulecat.conf.
-
-Example configuration file::
-
-    --suricata=/usr/sbin/suricata
-    --merged=rules/merged.rules
-    --disable=disable.conf
-    --enable=enable.conf
-    --modify=modify.conf
-    --post-hook=sudo kill -USR2 $(cat /var/run/suricata.pid)
-    --etpro=XXXXXXXXXXXXXXXX
-    --url=https://sslbl.abuse.ch/blacklist/sslblacklist.rules
-
-If *rulecat.conf* is in the current directory it will be used just by
-calling ``suricata-update`` with no arguments. Otherwise you can
-point *suricata-update* at a configuration with the command
-``suricata-update @/path/to/rulecat.conf``.
 
 Example Configuration Files
 ---------------------------
@@ -286,6 +243,10 @@ Example Configuration File (/etc/suricata/update.yaml)
    # OUTPUT_FILENAME - The name of the rule file. Will be empty if the rules
    #                   were not merged.
    #test-command: ${SURICATA_PATH} -T -S ${OUTPUT_FILENAME} -l /tmp
+
+   # Provide a command to reload the Suricata rules.
+   # May be overrided by the --reload-command command line option.
+   #reload-command: sudo systemctl reload suricata
 
 .. _example-enable-conf:
 

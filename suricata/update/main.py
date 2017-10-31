@@ -921,7 +921,7 @@ def main():
                         help="Use ET-Open rules (default)")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
                        help="Be quiet, warning and error messages only")
-    parser.add_argument("--post-hook", metavar="<command>",
+    parser.add_argument("--reload-command", metavar="<command>",
                         help="Command to run after update if modified")
     parser.add_argument("-T", "--test-command", metavar="<command>",
                         help="Command to test Suricata configuration")
@@ -1168,9 +1168,11 @@ def main():
         logger.error("Suricata test failed, aborting.")
         return 1
 
-    if args.post_hook:
-        logger.info("Running %s." % (args.post_hook))
-        subprocess.Popen(args.post_hook, shell=True).wait()
+    if config.get("reload-command"):
+        logger.info("Running %s." % (config.get("reload-command")))
+        rc = subprocess.Popen(config.get("reload-command"), shell=True).wait()
+        if rc != 0:
+            logger.error("Reload command exited with error: %d", rc)
 
     logger.info("Done.")
 
