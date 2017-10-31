@@ -1,4 +1,3 @@
 include LICENSE
-include idstools/rulecat/configs/*.conf
-include idstools/rulecat/configs/*.in
-
+include suricata/update/configs/*.conf
+include suricata/update/configs/*.in

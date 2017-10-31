@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# Launcher for idstools.script.rulecat.
+# Launcher for suricata-update
 
 import sys
 import os
@@ -8,5 +8,5 @@ import os
 sys.path.insert(
     0, os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0]))))
 
-import suricata.update.main
-sys.exit(suricata.update.main.main())
+from suricata.update import main
+sys.exit(main.main())

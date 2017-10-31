@@ -3,8 +3,6 @@ Suricata-Update
 
 The tool for updating your Suricata rules.
 
-Forked from the idstools-rulecat tool...
-
 Installation
 ------------
 
@@ -117,4 +115,3 @@ Files and Directories
 
 ``/var/lib/suricata/cache``
   Downloaded rule files are cached here.
-

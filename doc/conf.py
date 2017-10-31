@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# idstools documentation build configuration file, created by
+# Suricata-Update documentation build configuration file, created by
 # sphinx-quickstart on Wed Jul 17 23:14:56 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -217,7 +217,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('tools/rulecat', 'suricata-update', u'idstools Rulecat', [], 1)
+    ('index', 'suricata-update', u'Suricata Update', [], 1)
 ]
 
 # If true, show URL addresses after external links.
