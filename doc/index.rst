@@ -210,47 +210,12 @@ Options
 Example Configuration Files
 ---------------------------
 
+.. _example_update_yaml:
+
 Example Configuration File (/etc/suricata/update.yaml)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: yaml
-
-   # Configuration with disable filters.
-   # - Overrided by --disable-conf
-   # - Default: /etc/suricata/disable.conf
-   disable-conf: /etc/suricata/disable.conf
-
-   # Configuration with enable filters.
-   # - Overrided by --enable-conf
-   # - Default: /etc/suricata/enable.conf
-   enable-conf: /etc/suricata/enable.conf
-
-   # Configuration with drop filters.
-   # - Overrided by --drop-conf
-   # - Default: /etc/suricata/drop.conf
-   drop-conf: /etc/suricata/drop.conf
-
-   # Configuration with modify filters.
-   # - Overrided by --modify-conf
-   # - Default: /etc/suricata/modify.conf
-   modify-conf: /etc/suricata/modify.conf
-
-   # List of files to ignore. Overrided by the --ignore command line option.
-   ignore:
-     - "*deleted.rules"
-
-   # Provide an alternate command to the default test command.
-   #
-   # The following environment variables can be used.
-   # SURICATA_PATH - The path to the discovered suricata program.
-   # OUTPUT_DIR - The directory the rules are written to.
-   # OUTPUT_FILENAME - The name of the rule file. Will be empty if the rules
-   #                   were not merged.
-   #test-command: ${SURICATA_PATH} -T -S ${OUTPUT_FILENAME} -l /tmp
-
-   # Provide a command to reload the Suricata rules.
-   # May be overrided by the --reload-command command line option.
-   #reload-command: sudo systemctl reload suricata
+.. literalinclude:: ../suricata/update/configs/update.yaml
 
 .. _example-enable-conf:
 

@@ -1,6 +1,7 @@
 import os.path
 
 filenames = [
+    "update.yaml",
     "enable.conf",
     "disable.conf",
     "modify.conf",
