@@ -847,6 +847,10 @@ class Config:
         self.config[key] = val
 
 def test_suricata(config, suricata_path):
+    if not suricata_path:
+        logger.info("No suricata application binary found, skipping test.")
+        return True
+
     if config.get("no-test"):
         logger.info("Skipping test, disabled by configuration.")
         return True
