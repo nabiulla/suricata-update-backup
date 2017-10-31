@@ -207,6 +207,81 @@ Options
 
    Display the version of **suricata-update**.
 
+Rule Matching
+-------------
+
+Matching rules for disabling, enabling, converting to drop or
+modification can be done with the following:
+
+- signature ID
+- regular expression
+- rule group
+- filename
+
+Signature ID Matching
+~~~~~~~~~~~~~~~~~~~~~
+
+A signature ID can be matched by just its signature ID, for example::
+
+    1034
+
+The generator ID can also be used for compatibility with other tools::
+
+    1:1034
+
+Regular Expression Matching
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Regular expression matching will match a regular expression over the
+complete rule. Example::
+
+    re:heartbleed
+    re:MS(0[7-9]|10)-\d+
+
+Group Matching
+~~~~~~~~~~~~~~
+
+The group matcher matches against the group the rule was loaded
+from. Basically this is the filename without the leading path or file
+extension. Example::
+
+  group:emerging-icmp.rules
+  group:emerging-dos
+
+Wild card matching similar to wildcards used in a Unix shell can also
+be used::
+
+  group:*deleted*
+
+Filename Matching
+~~~~~~~~~~~~~~~~~
+
+The filename matcher matches against the filename the rule was loaded
+from taking into consideration the full path. Shell wildcard patterns
+are allowed::
+
+  filename:rules/*deleted*
+  filename:*/emerging-dos.rules
+
+Modifying Rules
+~~~~~~~~~~~~~~~
+
+Rule modification can be done with regular expression search and
+replace. The basic format for a rule modification specifier is::
+
+  <match> <from> <to>
+
+where <match> is one of the rule matchers from above, <from> is the
+text to be replaced and <to> is the replacement text.
+
+Example converting all alert rules to drop::
+
+  re:. ^alert drop
+
+Example converting all drop rules with noalert back to alert::
+
+  re:. "^drop(.*)noalert(.*)" "alert\\1noalert\\2"  
+
 Example Configuration Files
 ---------------------------
 
