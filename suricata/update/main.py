@@ -145,31 +145,50 @@ class FilenameMatcher(object):
     a group but has no specifier prefix.
     """
 
-    def __init__(self, filename):
-        self.filename = filename
-
-    def match(self, rule):
-        if hasattr(rule, "group") and \
-           os.path.basename(rule.group) == self.filename:
-            return True
-        return False
-
-    @classmethod
-    def parse(cls, buf):
-        if buf.strip().endswith(".rules"):
-            return cls(buf.strip())
-        return None
-
-class GroupMatcher(object):
-    """Matcher object to match an idstools rule object by its group (ie:
-    filename)."""
-
     def __init__(self, pattern):
         self.pattern = pattern
 
     def match(self, rule):
         if hasattr(rule, "group") and rule.group is not None:
             return fnmatch.fnmatch(rule.group, self.pattern)
+        return False
+
+    @classmethod
+    def parse(cls, buf):
+        if buf.startswith("filename:"):
+            try:
+                group = buf.split(":", 1)[1]
+                return cls(group.strip())
+            except:
+                pass
+        return None
+
+class GroupMatcher(object):
+    """Matcher object to match an idstools rule object by its group (ie:
+    filename).
+
+    The group is just the basename of the rule file with or without
+    extension.
+
+    Examples:
+    - emerging-shellcode
+    - emerging-trojan.rules
+
+    """
+
+    def __init__(self, pattern):
+        self.pattern = pattern
+
+    def match(self, rule):
+        if hasattr(rule, "group") and rule.group is not None:
+            if fnmatch.fnmatch(os.path.basename(rule.group), self.pattern):
+                return True
+            # Try matching against the rule group without the file
+            # extension.
+            if fnmatch.fnmatch(
+                    os.path.splitext(
+                        os.path.basename(rule.group))[0], self.pattern):
+                return True
         return False
 
     @classmethod

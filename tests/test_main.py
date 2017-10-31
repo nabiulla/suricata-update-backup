@@ -285,7 +285,7 @@ class ModifyRuleFilterTestCase(unittest.TestCase):
         self.assertIsNotNone(rule_in)
 
         f = main.ModifyRuleFilter.parse(
-            'emerging-trojan.rules "^alert" "drop"')
+            'group:emerging-trojan.rules "^alert" "drop"')
         self.assertIsNotNone(f)
 
         rule_out = f.filter(rule_in)
@@ -311,7 +311,13 @@ class GroupMatcherTestCase(unittest.TestCase):
 
     def test_match(self):
         rule = suricata.update.rule.parse(self.rule_string, "rules/malware.rules")
-        matcher = main.parse_rule_match("group: */malware.rules")
+        matcher = main.parse_rule_match("group: malware.rules")
+        self.assertEquals(
+            matcher.__class__, suricata.update.main.GroupMatcher)
+        self.assertTrue(matcher.match(rule))
+
+        # Test match of just the group basename.
+        matcher = main.parse_rule_match("group: malware")
         self.assertEquals(
             matcher.__class__, suricata.update.main.GroupMatcher)
         self.assertTrue(matcher.match(rule))
@@ -322,7 +328,7 @@ class FilenameMatcherTestCase(unittest.TestCase):
 
     def test_match(self):
         rule = suricata.update.rule.parse(self.rule_string, "rules/trojan.rules")
-        matcher = main.parse_rule_match("trojan.rules")
+        matcher = main.parse_rule_match("filename: */trojan.rules")
         self.assertEquals(
             matcher.__class__, suricata.update.main.FilenameMatcher)
         self.assertTrue(matcher.match(rule))
