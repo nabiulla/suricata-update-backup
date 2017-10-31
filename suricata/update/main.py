@@ -72,6 +72,7 @@ import suricata.update.net
 from suricata.update import configs
 from suricata.update.loghandler import SuriColourLogHandler
 from suricata.update import extract
+from suricata.update import util
 
 # Initialize logging, use colour if on a tty.
 if len(logging.root.handlers) == 0 and os.isatty(sys.stderr.fileno()):
@@ -858,6 +859,20 @@ def test_suricata(config, suricata_path):
 
     return True
 
+def copytree(src, dst):
+    """A shutil.copytree like function that will copy the files from one
+    tree to another even if the path exists.
+
+    """
+
+    for dirpath, dirnames, filenames in os.walk(src):
+        for filename in filenames:
+            src_path = os.path.join(dirpath, filename)
+            dst_path = os.path.join(dst, src_path[len(src) + 1:])
+            if not os.path.exists(os.path.dirname(dst_path)):
+                os.makedirs(os.path.dirname(dst_path))
+            shutil.copy2(src_path, dst_path)
+
 def main():
     global args
 
@@ -1135,6 +1150,12 @@ def main():
         logger.error("Output directory is not writable: %s", args.output)
         return 1
 
+    # Backup the output directory.
+    logger.info("Backing up current rules.")
+    backup_directory = util.mktempdir()
+    shutil.copytree(args.output, os.path.join(
+        backup_directory, "backup"))
+
     if not args.no_merge:
         # The default, write out a merged file.
         output_filename = os.path.join(
@@ -1168,6 +1189,8 @@ def main():
 
     if not test_suricata(config, suricata_path):
         logger.error("Suricata test failed, aborting.")
+        logger.error("Restoring previous rules.")
+        copytree(os.path.join(backup_directory, "backup"), args.output)
         return 1
 
     if config.get("reload-command"):
