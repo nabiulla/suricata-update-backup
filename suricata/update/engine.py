@@ -113,6 +113,7 @@ def test_configuration(path, rule_filename=None):
     # output.
     env = {
         "SC_LOG_FORMAT": "%t - <%d> -- ",
+        "SC_LOG_LEVEL": "Warning",
     }
 
     rc = subprocess.Popen(test_command, env=env).wait()
