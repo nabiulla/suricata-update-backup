@@ -15,7 +15,7 @@ setup(
         "suricata.update.compat",
         "suricata.update.compat.argparse",
     ],
-    url="https://github.com/jasonish/suricata-updater",
+    url="https://github.com/OISF/suricata-update",
     license="GPLv2",
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
