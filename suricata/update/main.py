@@ -976,9 +976,27 @@ def main():
     parser.add_argument("--no-merge", action="store_true", default=False,
                         help="Do not merge the rules into a single file")
 
-    parser.add_argument("--disable*", help=argparse.SUPPRESS)
+    # The Python 2.7 argparse module does prefix matching which can be
+    # undesirable. Reserve some names here that would match existing
+    # options to prevent prefix matching.
+    parser.add_argument("--disable", default=False, help=argparse.SUPPRESS)
+    parser.add_argument("--enable", default=False, help=argparse.SUPPRESS)
+    parser.add_argument("--modify", default=False, help=argparse.SUPPRESS)
+    parser.add_argument("--drop", default=False, help=argparse.SUPPRESS)
 
     args = parser.parse_args()
+
+    # Error out if any reserved/unimplemented arguments were set.
+    unimplemented_args = [
+        "disable",
+        "enable",
+        "modify",
+        "drop",
+    ]
+    for arg in unimplemented_args:
+        if getattr(args, arg):
+            logger.error("--%s not implemented", arg)
+            return 1
 
     if args.version:
         print("suricata-update version %s" % suricata.update.version)
