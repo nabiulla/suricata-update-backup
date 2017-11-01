@@ -314,10 +314,12 @@ class Fetch(object):
                 os.utime(tmp_filename, None)
                 return True
         except Exception as err:
-            logger.error("Failed to check remote checksum: %s" % err)
+            logger.warning("Failed to check remote checksum: %s" % err)
         return False
 
     def progress_hook(self, content_length, bytes_read):
+        if self.args.quiet:
+            return
         if not content_length or content_length == 0:
             percent = 0
         else:
@@ -357,19 +359,31 @@ class Fetch(object):
         if not os.path.exists(self.args.cache_dir):
             os.makedirs(self.args.cache_dir, mode=0o770)
         logger.info("Fetching %s." % (url))
-        suricata.update.net.get(
-            url,
-            open(tmp_filename, "wb"),
-            progress_hook=self.progress_hook if not self.args.quiet else None)
+        try:
+            suricata.update.net.get(
+                url,
+                open(tmp_filename, "wb"),
+                progress_hook=self.progress_hook)
+        except:
+            if os.path.exists(tmp_filename):
+                os.unlink(tmp_filename)
+            raise
         if not self.args.quiet:
             self.progress_hook_finish()
         logger.info("Done.")
         return self.extract_files(tmp_filename)
 
-    def run(self):
-        files = {}
-        for url in self.args.url:
-            files.update(self.fetch(url))
+    def run(self, url=None, files=None):
+        if files is None:
+            files = {}
+        if url:
+            try:
+                files.update(self.fetch(url))
+            except Exception as err:
+                logger.error("Failed to fetch %s: %s", url, err)
+        else:
+            for url in self.args.url:
+                files.update(self.fetch(url))
         return files
 
     def extract_files(self, filename):
@@ -464,17 +478,15 @@ def load_local(local, files):
             local_files.append(local)
         for filename in local_files:
             logger.info("Loading local file %s" % (filename))
-            basename = os.path.basename(filename)
-            if basename in files:
+            if filename in files:
                 logger.warn(
                     "Local file %s overrides existing file of same name." % (
                         filename))
             try:
                 with open(filename, "rb") as fileobj:
-                    files[basename] = fileobj.read()
+                    files[filename] = fileobj.read()
             except Exception as err:
                 logger.error("Failed to open %s: %s" % (filename, err))
-                sys.exit(1)
 
 def load_dist_rules(files):
     """Load the rule files provided by the Suricata distribution."""
@@ -517,7 +529,7 @@ def load_dist_rules(files):
                 logger.warning("Distribution rule file not readable: %s",
                                path)
                 continue
-            logger.info("Loading rule file %s", path)
+            logger.info("Loading distribution rule file %s", path)
             try:
                 with open(path, "rb") as fileobj:
                     files[path] = fileobj.read()
@@ -804,6 +816,8 @@ class Config:
         "enable-conf": "/etc/suricata/enable.conf",
         "drop-conf": "/etc/suricata/drop.conf",
         "modify-conf": "/etc/suricata/modify.conf",
+        "sources": [],
+        "local": [],
     }
 
     def __init__(self, args):
@@ -826,6 +840,8 @@ class Config:
                         self.config.update(config)
 
     def get_arg(self, key):
+        """Return the value for a command line argument. To be compatible
+        with the configuration file, hypens are converted to underscores."""
         key = key.replace("-", "_")
         if hasattr(self.args, key) and getattr(self.args, key) != None:
             val = getattr(self.args, key)
@@ -834,6 +850,8 @@ class Config:
         return None
 
     def get(self, key):
+        """Get a configuration file preferring the value provided on the
+        command line, then checking the configuration file."""
         val = self.get_arg(key)
         if val:
             return val
@@ -896,6 +914,63 @@ def copytree(src, dst):
             if not os.path.exists(os.path.dirname(dst_path)):
                 os.makedirs(os.path.dirname(dst_path), mode=0o770)
             shutil.copy2(src_path, dst_path)
+
+def load_sources(config, suricata_version):
+    files = {}
+
+    urls = []
+
+    # If --etopen was provided on the command line, add it.
+    if config.get("etopen"):
+        urls.append(resolve_etopen_url(suricata_version))
+
+    # If --etpro was provided on the command line, add it.
+    if config.get("etpro"):
+        urls.append(resolve_etpro_url(config.get("etpro"), suricata_version))
+
+    # Add any URLs added with the --url command line parameter.
+    if config.args.url:
+        for url in config.args.url:
+            urls.append(url)
+
+    if config.get("sources"):
+        for source in config.get("sources"):
+            if not "type" in source:
+                logger.error("Source is missing a type: %s", str(source))
+                continue
+            if source["type"] == "url":
+                urls.append(source["url"])
+            elif source["type"] == "etopen":
+                urls.append(resolve_etopen_url(suricata_version))
+            elif source["type"] == "etpro":
+                if "code" in source:
+                    code = source["code"]
+                else:
+                    code = config.get("etpro")
+                if not code:
+                    logger.error("ET-Pro source specified without code: %s",
+                                 str(source))
+                else:
+                    urls.append(resolve_etpro_url(code, suricata_version))
+            else:
+                logger.error("Unknown source type: %s", source["type"])
+
+    # Converting the URLs to a set removed dupes.
+    urls = set(urls)
+
+    # Now download each URL.
+    for url in urls:
+        Fetch(config.args).run(url, files)
+
+    # Now load local rules specified in the configuration file.
+    for local in config.config["local"]:
+        load_local(local, files)
+
+    # And the local rules specified on the command line.
+    for local in config.args.local:
+        load_local(local, files)
+
+    return files
 
 def main():
     global args
@@ -1064,13 +1139,6 @@ def main():
         suricata_version = suricata.update.engine.parse_version(
             DEFAULT_SURICATA_VERSION)
 
-    if config.get("etpro"):
-        args.url.append(
-            resolve_etpro_url(config.get("etpro"), suricata_version))
-    if not args.url or args.etopen:
-        args.url.append(resolve_etopen_url(suricata_version))
-    args.url = set(args.url)
-
     file_tracker = FileTracker()
 
     disable_matchers = []
@@ -1111,12 +1179,9 @@ def main():
                 "Cache directory does exist and could not be created. /var/tmp will be used instead.")
             args.cache_dir = "/var/tmp"
 
-    files = Fetch(args).run()
+    files = load_sources(config, suricata_version)
 
     load_dist_rules(files)
-
-    for path in args.local:
-        load_local(path, files)
 
     # Remove ignored files.
     for filename in list(files.keys()):

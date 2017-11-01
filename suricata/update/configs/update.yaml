@@ -34,3 +34,24 @@ ignore:
 # Provide a command to reload the Suricata rules.
 # May be overrided by the --reload-command command line option.
 #reload-command: sudo systemctl reload suricata
+
+# Remote rule sources.
+sources:
+  # Emerging Threats Open
+  - type: etopen
+  # Emerging Threats Pro
+  - type: etpro
+    code: xxxxx
+  # A URL
+  - type: url
+    url: https://sslbl.abuse.ch/blacklist/sslblacklist.rules
+
+# A list of local rule sources. Each entry can be a rule file, a
+# directory or a wild card specification.
+local:
+  # A directory of rules.
+  - /etc/suricata/rules
+  # A single rule file.
+  - /etc/suricata/rules/app-layer-events.rules
+  # A wildcard.
+  - /etc/suricata/rules/*.rules
