@@ -355,7 +355,7 @@ class Fetch(object):
                 logger.info("Remote checksum has not changed. Not fetching.")
                 return self.extract_files(tmp_filename)
         if not os.path.exists(self.args.cache_dir):
-            os.makedirs(self.args.cache_dir)
+            os.makedirs(self.args.cache_dir, mode=0o770)
         logger.info("Fetching %s." % (url))
         suricata.update.net.get(
             url,
@@ -870,6 +870,7 @@ def test_suricata(config, suricata_path):
         if rc != 0:
             return False
     else:
+        logger.info("Testing with suricata -T.")
         if not config.get("no-merge"):
             if not suricata.update.engine.test_configuration(
                     suricata_path, os.path.join(
@@ -893,7 +894,7 @@ def copytree(src, dst):
             src_path = os.path.join(dirpath, filename)
             dst_path = os.path.join(dst, src_path[len(src) + 1:])
             if not os.path.exists(os.path.dirname(dst_path)):
-                os.makedirs(os.path.dirname(dst_path))
+                os.makedirs(os.path.dirname(dst_path), mode=0o770)
             shutil.copy2(src_path, dst_path)
 
 def main():
@@ -1085,7 +1086,7 @@ def main():
     # Check that the cache directory exists and is writable.
     if not os.path.exists(args.cache_dir):
         try:
-            os.makedirs(args.cache_dir, mode=770)
+            os.makedirs(args.cache_dir, mode=0o770)
         except Exception as err:
             logger.warning(
                 "Cache directory does exist and could not be created. /var/tmp will be used instead.")
@@ -1168,7 +1169,7 @@ def main():
     # Check that output directory exists.
     if not os.path.exists(args.output):
         try:
-            os.makedirs(args.output, mode=770)
+            os.makedirs(args.output, mode=0o770)
         except Exception as err:
             logger.error(
                 "Output directory does not exist and could not be created: %s",
