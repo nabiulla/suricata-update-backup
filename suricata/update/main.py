@@ -768,7 +768,7 @@ def resolve_etpro_url(etpro, suricata_version):
         "version": "",
     }
 
-    mappings["version"] = "-%d.%d" % (suricata_version.major,
+    mappings["version"] = "-%d.%d.%d" % (suricata_version.major,
                                       suricata_version.minor,
                                       suricata_version.patch)
 
@@ -1046,8 +1046,9 @@ def main():
         suricata_version = suricata.update.engine.parse_version(
             DEFAULT_SURICATA_VERSION)
 
-    if args.etpro:
-        args.url.append(resolve_etpro_url(args.etpro, suricata_version))
+    if config.get("etpro"):
+        args.url.append(
+            resolve_etpro_url(config.get("etpro"), suricata_version))
     if not args.url or args.etopen:
         args.url.append(resolve_etopen_url(suricata_version))
     args.url = set(args.url)
