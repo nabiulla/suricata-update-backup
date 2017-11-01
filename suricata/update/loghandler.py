@@ -57,7 +57,12 @@ class SuriColourLogHandler(logging.StreamHandler):
 
     def formatTime(self, record):
         lt = time.localtime(record.created)
-        t = time.strftime("%d/%m/%Y -- %H:%M:%S", lt)
+        t = "%d/%d/%d -- %02d:%02d:%02d" % (lt.tm_mday,
+                                            lt.tm_mon,
+                                            lt.tm_year,
+                                            lt.tm_hour,
+                                            lt.tm_min,
+                                            lt.tm_sec)
         return "%s" % (t)
 
     def emit(self, record):
