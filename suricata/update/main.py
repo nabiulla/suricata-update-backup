@@ -85,15 +85,18 @@ else:
         format="%(asctime)s - <%(levelname)s> - %(message)s")
     logger = logging.getLogger()
 
+# If Suricata is not found, default to this version.
+DEFAULT_SURICATA_VERSION = "4.0"
+
 # Template URL for Emerging Threats Pro rules.
 ET_PRO_URL = ("https://rules.emergingthreatspro.com/"
               "%(code)s/"
-              "suricata%(version)s%(enhanced)s/"
+              "suricata%(version)s/"
               "etpro.rules.tar.gz")
 
 # Template URL for Emerging Threats Open rules.
 ET_OPEN_URL = ("https://rules.emergingthreats.net/open/"
-               "suricata%(version)s%(enhanced)s/"
+               "suricata%(version)s/"
                "emerging.rules.tar.gz")
 
 # The default filename to use for the output rule file. This is a
@@ -763,25 +766,22 @@ def resolve_etpro_url(etpro, suricata_version):
     mappings = {
         "code": etpro,
         "version": "",
-        "enhanced": "",
     }
 
     mappings["version"] = "-%d.%d" % (suricata_version.major,
-                                      suricata_version.minor)
-    mappings["enhanced"] = "-enhanced"
+                                      suricata_version.minor,
+                                      suricata_version.patch)
 
     return ET_PRO_URL % mappings
 
 def resolve_etopen_url(suricata_version):
     mappings = {
         "version": "",
-        "enhanced": "",
     }
 
-    # For now just assume 1.3-enhanced as the ET open set doesn't
-    # resolve enhanced URLs for other version.
-    mappings["version"] = "-1.3"
-    mappings["enhanced"] = "-enhanced"
+    mappings["version"] = "-%d.%d.%d" % (suricata_version.major,
+                                         suricata_version.minor,
+                                         suricata_version.patch)
 
     return ET_OPEN_URL % mappings
 
@@ -975,6 +975,8 @@ def main():
     parser.add_argument("--no-merge", action="store_true", default=False,
                         help="Do not merge the rules into a single file")
 
+    parser.add_argument("--disable*", help=argparse.SUPPRESS)
+
     args = parser.parse_args()
 
     if args.version:
@@ -1038,7 +1040,10 @@ def main():
             logger.error("Failed to get Suricata version.")
             return 1
     else:
-        suricata_version = None
+        logger.info(
+            "Using default Suricata version of %s", DEFAULT_SURICATA_VERSION)
+        suricata_version = suricata.update.engine.parse_version(
+            DEFAULT_SURICATA_VERSION)
 
     if args.etpro:
         args.url.append(resolve_etpro_url(args.etpro, suricata_version))
